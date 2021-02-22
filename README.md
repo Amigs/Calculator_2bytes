@@ -1,6 +1,6 @@
 # Calculator_2bytes
 
-###Requirements:
+### Requirements:
 1.El sistema se debe comportar como una calculadora ( +, -, x, /) con resultados de números de hasta 16bits positivos y negativos.
 2. El sistema tendrá 6 pulsadores para la entrada de datos así:
  * Cuatro (4) pulsadores que corresponden al ingreso de unidades, decenas, centenas y miles, al pulsar un número de veces cada uno de estos debe incrementar el valor (según sea, decena, etc..) e ir mostrando el número que se va ingresando en los LEDS de forma binaria.
@@ -12,7 +12,7 @@
  * Número mínimo para ingresar: 0
  * Número máximo para ingresar: 65535
  * Rango de números para el resultado: -65535 y 65535
-###Materiales:
+### Materials:
 1. Microcontrolador STM32F103
 2. 16 LEDS ubicados en línea.
 3. 6 pulsadores
