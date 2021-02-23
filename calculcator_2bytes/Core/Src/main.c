@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
+  **************************
   * @file           : main.c
   * @brief          : Main program body
-  ******************************************************************************
+  **************************
   * @attention
   *
   * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
@@ -14,7 +14,7 @@
   * License. You may obtain a copy of the License at:
   *                        opensource.org/licenses/BSD-3-Clause
   *
-  ******************************************************************************
+  **************************
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -44,11 +44,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint16_t n1 = 0;
-uint16_t n2 = 0;
-uint16_t res = 0;
+uint32_t n1 = 0;
+uint32_t n2 = 0;
+uint32_t res = 0;
 uint8_t operator;
 uint8_t flag = 0;
+int i = 0;
+int j = 0;
 uint8_t binary[16];
 /* USER CODE END PV */
 
@@ -56,7 +58,7 @@ uint8_t binary[16];
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-uint16_t read_number(void);
+uint32_t read_number(void);
 uint8_t selector_operation(void);
 uint32_t calculate_n(uint16_t num1,uint16_t num2,uint8_t operation);
 uint32_t negative(uint16_t num1,uint16_t num2);
@@ -78,7 +80,6 @@ void print(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -100,7 +101,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-
+	for (i=0;i<16;i++)
+		binary[i] = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,6 +111,8 @@ int main(void)
   {
 	  n1 = read_number();
 	  operator = selector_operation();
+	  if(HAL_GPIO_ReadPin(GPIOA, Enter_Reset_Pin) == 1)
+		  operator = selector_operation();
 	  n2 = read_number();
 	  res = calculate_n(n1, n2, operator);
 	  printf_solution(res,flag);
@@ -219,67 +223,83 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-uint16_t read_number(){
-	uint8_t u = 0,c = 0,d = 0,m = 0;
+uint32_t read_number(){
+
 	uint8_t unidades = 0;
 	uint8_t decenas = 0;
-	uint8_t centenas = 0;
+	uint16_t centenas = 0;
 	uint16_t miles = 0;
-	uint16_t numero = 0;
+	uint32_t numero = 0;
 
-	u = HAL_GPIO_ReadPin(GPIOA, Unidades_Pin);
-	d = HAL_GPIO_ReadPin(GPIOA, Decenas_Pin);
-	c = HAL_GPIO_ReadPin(GPIOA, Centenas_Pin);
-	m = HAL_GPIO_ReadPin(GPIOA, Miles_Pin);
-
-	while(HAL_GPIO_ReadPin(GPIOA, Enter_Reset_Pin) != 1)
+	while((HAL_GPIO_ReadPin(GPIOA, Enter_Reset_Pin) != 1) && (numero <= 65535))
 	{
-		numero = 4000;
-	}
+ 		if((HAL_GPIO_ReadPin(GPIOA, Unidades_Pin) == 1))
+ 			unidades++;
+ 		else if((HAL_GPIO_ReadPin(GPIOA, Decenas_Pin) == 1))
+			decenas++;
+ 		else if((HAL_GPIO_ReadPin(GPIOA, Centenas_Pin) == 1))
+			centenas++;
+ 		else if((HAL_GPIO_ReadPin(GPIOA, Miles_Pin) == 1))
+			miles++;
 
+		numero = (unidades)+(decenas*10)+(centenas*100)+(miles*1000);
+		dec2bin(numero);
+		print();
+		HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED9_Pin|LED10_Pin
+		                          |LED11_Pin|LED12_Pin|LED13_Pin|LED14_Pin
+		                          |LED4_Pin|LED5_Pin|LED6_Pin|LED7_Pin
+		                          |LED8_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOA, LED15_Pin|LED2_Pin|LED3_Pin, GPIO_PIN_RESET);
+	}
 	return numero;
 }
 
 uint8_t selector_operation(){
 	uint8_t op;
 	uint8_t contador = 0;
+	uint8_t track = 2;
+	while(track == 2){
+		if(HAL_GPIO_ReadPin(GPIOA, Operacion_Pin)==1)
+			contador++;
+		switch (contador)
+		{
+		case 1:
+			HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
+			op = '+';
+			break;
+		case 2:
+			HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+			op = '-';
+			break;
+		case 3:
+			HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+			op = '*';
+			break;
+		case 4:
+			HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+			op = '/';
+			break;
+		default:
+			op = '+';
+			break;
 
-	/*if(HAL_GPIO_ReadPin(GPIOA, Operacion_Pin)==1)
-	{
-		contador++;
-	}*/
-	contador = 2;
-
-	switch (contador)
-	{
-	case 1:
-		op = '+';
-		break;
-	case 2:
-		op = '-';
-		break;
-	case 3:
-		op = '*';
-		break;
-	case 4:
-		op = '/';
-		break;
-	default:
-		break;
-
-	return op;
-
+		}
+		HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+		if (HAL_GPIO_ReadPin(GPIOA, Enter_Reset_Pin) == 1)
+			track--;
 	}
+	return op;
 }
-
 uint32_t calculate_n(uint16_t num1,uint16_t num2,uint8_t operation){
 	uint32_t resultado = 0;
 	if(num1 < num2){
 		flag = 1;
 		resultado = negative(num2,num1);
-	}else{
+	}else
 		resultado= solution(num1,num2,operation);
-	}
 	return resultado;
 }
 
@@ -300,12 +320,15 @@ uint32_t solution(uint16_t num1,uint16_t num2,uint8_t operation){
 			result = num1 * num2;
 			break;
 		case '/':
-			result = num1 / num2;
+			if(num2 == 0)
+				flag = 2;
+			else
+				result = num1 / num2;
 			break;
 	}
-	if(result > 65535){
+	if(result > 65535)
 		flag = 2;
-	}
+
 	return result;
 }
 
@@ -317,45 +340,58 @@ void printf_solution(uint32_t result, uint8_t bandera){
 			print();
 			break;
 		case 1:
-
+			print();
 			break;
 		case 2:
 			HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED9_Pin|LED10_Pin
 			                          |LED11_Pin|LED12_Pin|LED13_Pin|LED14_Pin
-			                          |LED2_Pin|LED3_Pin|LED4_Pin|LED5_Pin
-			                          |LED6_Pin|LED7_Pin|LED8_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(LED15_GPIO_Port, LED15_Pin, GPIO_PIN_SET);
+			                          |LED4_Pin|LED5_Pin|LED6_Pin|LED7_Pin
+			                          |LED8_Pin, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOA, LED15_Pin|LED2_Pin|LED3_Pin, GPIO_PIN_SET);
 			HAL_Delay(delay_error);
 			HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED9_Pin|LED10_Pin
 			                          |LED11_Pin|LED12_Pin|LED13_Pin|LED14_Pin
-			                          |LED2_Pin|LED3_Pin|LED4_Pin|LED5_Pin
-			                          |LED6_Pin|LED7_Pin|LED8_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(LED15_GPIO_Port, LED15_Pin, GPIO_PIN_RESET);
+			                          |LED4_Pin|LED5_Pin|LED6_Pin|LED7_Pin
+			                          |LED8_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOA, LED15_Pin|LED2_Pin|LED3_Pin, GPIO_PIN_RESET);
+			HAL_Delay(delay_error);
 			break;
+		}
+		if(flag == 1){
+			HAL_Delay(delay_negative);
+			HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED9_Pin|LED10_Pin
+			                          |LED11_Pin|LED12_Pin|LED13_Pin|LED14_Pin
+			                          |LED4_Pin|LED5_Pin|LED6_Pin|LED7_Pin
+			                          |LED8_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOA, LED15_Pin|LED2_Pin|LED3_Pin, GPIO_PIN_RESET);
+			HAL_Delay(delay_negative);
 		}
 	}
 	HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED9_Pin|LED10_Pin
-	                          |LED11_Pin|LED12_Pin|LED13_Pin|LED14_Pin
-	                          |LED2_Pin|LED3_Pin|LED4_Pin|LED5_Pin
-	                          |LED6_Pin|LED7_Pin|LED8_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(LED15_GPIO_Port, LED15_Pin, GPIO_PIN_RESET);
+				                          |LED11_Pin|LED12_Pin|LED13_Pin|LED14_Pin
+				                          |LED4_Pin|LED5_Pin|LED6_Pin|LED7_Pin
+				                          |LED8_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, LED15_Pin|LED2_Pin|LED3_Pin, GPIO_PIN_RESET);
 }
 void dec2bin(uint32_t dec){
 	uint8_t bin[16];
-	int i = 0;
-    int j = 0;
-    while (dec > 0){
+	i = 0;
+	for (j=0;j<16;j++)
+		bin[j] = 0;
+	while (dec > 0){
         bin[i] = dec % 2;
         dec /= 2;
         i++;
     }
     for(j=15;j>-1;j--)
     	binary[j]=bin[j];
+    i = 0;
+    j = 0;
 }
 void print(void){
-	int j = 0;
+	j = 0;
 	uint16_t a = 0;
-    for(j=0;j<15;j++){
+    for(j=0;j<16;j++){
     	if(binary[j]==1){
     		a=j+1;
     	}
@@ -408,8 +444,11 @@ void print(void){
 		case 16:
 			HAL_GPIO_WritePin(LED15_GPIO_Port, LED15_Pin, GPIO_PIN_SET);
 			break;
+		default:
+			break;
 		}
     }
+    j = 0;
 }
 /* USER CODE END 4 */
 
@@ -445,4 +484,4 @@ void assert_failed(uint8_t *file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+/******** (C) COPYRIGHT STMicroelectronics **END OF FILE*/
