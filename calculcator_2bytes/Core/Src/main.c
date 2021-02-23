@@ -57,10 +57,10 @@ static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 uint16_t read_number();
 uint8_t selector_operation();
-uint16_t calculate_n(uint16_t num1,uint16_t num2,uint8_t operation);
-uint16_t negative(uint16_t num1,uint16_t num2);
-uint16_t solution(uint16_t num1,uint16_t num2,uint8_t operation);
-void printf_solution(uint16_t result, uint8_t bandera);
+uint32_t calculate_n(uint16_t num1,uint16_t num2,uint8_t operation);
+uint32_t negative(uint16_t num1,uint16_t num2);
+uint32_t solution(uint16_t num1,uint16_t num2,uint8_t operation);
+void printf_solution(uint32_t result, uint8_t bandera);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -269,8 +269,8 @@ uint8_t selector_operation(){
 	}
 }
 
-uint16_t calculate_n(uint16_t num1,uint16_t num2,uint8_t operation){
-	uint16_t resultado = 0;
+uint32_t calculate_n(uint16_t num1,uint16_t num2,uint8_t operation){
+	uint32_t resultado = 0;
 	if(num1 < num2){
 		flag = 1;
 		resultado = negative(num2,num1);
@@ -280,14 +280,14 @@ uint16_t calculate_n(uint16_t num1,uint16_t num2,uint8_t operation){
 	return resultado;
 }
 
-uint16_t negative(uint16_t num1,uint16_t num2){
-	uint16_t resultado = 0;
+uint32_t negative(uint16_t num1,uint16_t num2){
+	uint32_t resultado = 0;
 	resultado = num1 - num2;
 	return resultado;
 }
 
-uint16_t solution(uint16_t num1,uint16_t num2,uint8_t operation){
-	uint16_t result = 0;
+uint32_t solution(uint16_t num1,uint16_t num2,uint8_t operation){
+	uint32_t result = 0;
 	switch(operation)
 	{
 		case '+':
@@ -306,7 +306,7 @@ uint16_t solution(uint16_t num1,uint16_t num2,uint8_t operation){
 	return result;
 }
 
-void printf_solution(uint16_t result, uint8_t bandera){
+void printf_solution(uint32_t result, uint8_t bandera){
 	while(HAL_GPIO_ReadPin(GPIOA, Enter_Reset_Pin) != 1){
 		switch(bandera){
 		case 0:
