@@ -1,7 +1,7 @@
 # Calculator_2bytes
 
 ### Requirements:
-1.El sistema se debe comportar como una calculadora ( +, -, x, /) con resultados de números de hasta 16bits positivos y negativos.
+1. El sistema se debe comportar como una calculadora ( +, -, x, /) con resultados de números de hasta 16bits positivos y negativos.
 2. El sistema tendrá 6 pulsadores para la entrada de datos así:
  * Cuatro (4) pulsadores que corresponden al ingreso de unidades, decenas, centenas y miles, al pulsar un número de veces cada uno de estos debe incrementar el valor (según sea, decena, etc..) e ir mostrando el número que se va ingresando en los LEDS de forma binaria.
  * Un pulsador para cambiar entre las 4 posibilidades de operaciones por cada pulsación, suma, resta multiplicación y división. Se debe mostrar en los 4 bits menos significativos de los LEDS. LED[0]->suma, LED[1]->resta, LED[2]->multiplicación, LED[3]->división.
